@@ -18,19 +18,24 @@ class MovieListSerializer(serializers.ModelSerializer):
 # detail 페이지
 class MovieSerializer(serializers.ModelSerializer):
     reviews = serializers.SerializerMethodField()
-    
+    genres = serializers.SerializerMethodField()
+
     class Meta:
         model = Movie
-        fields = ('title', 'poster_path', 'popularity', 'vote_count', 'vote_average', 'overview', 'poster_path', 'genres', 'reviews', 'id',)
+        fields = ('title', 'popularity', 'vote_count', 'vote_average', 'overview', 'poster_path', 'genres', 'reviews', 'id', 'release_date', )
         # fields = '__all__'
         
     # reviews 추가
     def get_reviews(self, movie):
         reviews = movie.review_set.all()
-        print('*' * 50)
-        print(reviews)
         return [{'title': review.title, 'content': review.content, 'rank':review.rank, } for review in reviews]
     
+    def get_genres(self, movie):
+        genres_obj = Genre.objects.filter(movie = movie)
+        genres = []
+        for g in genres_obj:
+            genres.append(g.name)
+        return genres
 
 class myReviewSerializer(serializers.ModelSerializer):
     # genre = serializers.SerializerMethodField()

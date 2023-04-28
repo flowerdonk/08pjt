@@ -1,11 +1,21 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  {{movie}}
+  <h1>{{movie.title}}</h1>
+  <p><img src="{{movie.poster_path}}" alt="{{movie.title}}"></p>
+  <p>장르:
+  {% for genre in movie.genres %}
+    {{genre}},
+  {% endfor %}</p>
+  <p>개봉: {{movie.release_date}}</p>
+  <p>인기도: {{movie.popularity}}</p>
+  <p>평가 수: {{movie.vote_count}}    평점: {{movie.vote_average}}</p>
+  <p>줄거리: {{movie.overview}}</p>
   <br><br><br>
 
   {% for review in movie.reviews %}
-    <p>제목: {{ review.title }}   별점: {{ review.rank }}</p>
+    <p>제목: {{ review.title }}</p>
+    <p>별점: {{ review.rank }}</p>
     <p>{{ review.content }}</p>
     <hr>
   {% endfor %}

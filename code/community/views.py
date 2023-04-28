@@ -23,7 +23,7 @@ def create(request, movie_pk):
             review.movie_id = Movie.objects.get(pk=movie_pk)
             review.user = request.user
             review.save()
-            return redirect('movies:index')
+            return redirect('movies:detail', movie_pk)
     else:
         form = ReviewForm()
     context = {
