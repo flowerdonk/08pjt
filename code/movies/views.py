@@ -33,19 +33,23 @@ def detail(request, movie_pk):
 @require_safe
 def recommended(request):
 
-    # 제가 작성한 리뷰의 무비 id
-    # mymovies = get_list_or_404(Review, user_id=request.user)
+    # 해당 프로필 유저가 작성한 리뷰 목록
     myMovies = Review.objects.filter(user=request.user)
-    print(myMovies)
-    for m in myMovies:
-        print(m.movie_id.genres_id.name)
-    serializer = myReviewSerializer(myMovies, many=True)
 
-    # data = serializer.data
-    # genres = [item.pop('name') for item in data]
-    # print('serializer.data', serializer.data)
+    # 해당 유저가 작성한 리뷰들의 장르 값을 담을 딕셔너리 {'장르': 작성한 리뷰 수}
+    genre_list = dict()
+
+    # 리뷰 목록을 돌며 장르 가져오기
+    for m in myMovies: 
+        movie_id = Movie.objects.get(pk=m.movie_id.pk) # 해당 리뷰 하나의 영화 id
+        genre_obj = Genre.objects.filter(movie = movie_id) # 해당 영화 id의 장르 객체 반환
+        for g in genre_obj: # 해당 영화의 장르가 여러개일 수 있어서 반복문 사용
+            if g.name not in genre_list.keys(): # 딕셔너리에 해당 장르가 없으면 키 추가
+                genre_list[g.name] = 1
+            else: # 딕셔너리에 해당 장르가 있으면 값 추가
+                genre_list[g.name] += 1
+
     context = {
-        # 'genres' : genres,
-        'genres' : serializer.data,
+        'genre_list' : genre_list,
     }
     return render(request, 'movies/recommended.html', context)
