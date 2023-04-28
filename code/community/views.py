@@ -3,6 +3,8 @@ from django.views.decorators.http import require_safe, require_POST, require_htt
 from .models import Review, Comment
 from .forms import ReviewForm, CommentForm
 from movies.models import Movie
+from django.http import JsonResponse
+
 
 @require_safe
 def index(request):
@@ -67,11 +69,15 @@ def create_comment(request, review_pk):
 def like(request, review_pk):
     if request.user.is_authenticated:
         review = get_object_or_404(Review, pk=review_pk)
-        user = request.user
-
-        if review.like_users.filter(pk=user.pk).exists():
-            review.like_users.remove(user)
+        if review.like_users.filter(pk=request.user.pk).exists():
+            review.like_users.remove(request.user)
+            is_liked = False     
         else:
-            review.like_users.add(user)
-        return redirect('community:index')
+            review.like_users.add(request.user)
+            is_liked = True     
+        context = {                
+            'is_liked': is_liked,
+            'likes_count' : review.like_users.count(),
+        }
+        return JsonResponse(context) 
     return redirect('accounts:login')

@@ -8,18 +8,50 @@
     <p>글 번호: {{ review.pk }}</p>
     <p>글 제목: {{ review.title }}</p>
     <p>글 내용: {{ review.content }}</p>
-    <form action="{% url 'community:like' review.pk %}" method="POST">
-      {% csrf_token %}
-      {% if user in review.like_users.all %}
-        <button>좋아요 취소</button>
+    <form class="like-forms" data-review-id="{{ review.pk }}">
+      {% if request.user in review.like_users.all %}
+        <input type="submit" value="좋아요 취소" id="like-{{ review.pk }}">
       {% else %}
-        <button>좋아요</button>
+        <input type="submit" value="좋아요" id="like-{{ review.pk }}">
       {% endif %}
     </form>
     <p>
-      <span>{{ review.like_users.all|length }}</span> 명이 이 글을 좋아합니다.
+      <span id="likes_count"></span> 명이 이 글을 좋아합니다.
     </p>
     <a href="{% url 'community:detail' review.pk %}">[detail]</a>
     <hr>
   {% endfor %}
-{% endblock %}
+{% endblock content %}
+
+{% block script %}
+  const forms = document.querySelectorAll('.like-forms')
+  const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+
+  forms.forEach((form) => { // addEventListener에는 가급적 arrow함수 사용 X
+    form.addEventListener('submit', function (event) { // 각각의 이벤트마다
+      event.preventDefault() // 없을 경우 form의 기본 기능인 데이터 전송으로 인해 새로고침됨
+
+      const reviewId = event.target.dataset.reviewId
+
+      axios({
+        method: 'POST',
+        url: `http://127.0.0.1:8000/community/${reviewId}/like/`,
+        headers: {'X-CSRFToken': csrftoken},
+      })
+      .then((response) => {
+        // like 버튼을 이전에 눌렀는가? 좋아요/좋아요 취소 결정 (서버로 좋아요 여부 받기)
+        const isLiked = response.data.is_liked
+        const likeBtn = document.querySelector(`#like-${reviewId}`) // backtick
+
+        const likesCountTag = document.querySelector('#likes_count')
+        const likesCount = response.data.likes_count
+        likesCountTag.innerText = likesCount
+        if (isLiked === true){
+          likeBtn.value = '좋아요 취소'
+        } else {
+          likeBtn.value = '좋아요'
+        }
+      })
+    })
+  })
+{% endblock script %}
