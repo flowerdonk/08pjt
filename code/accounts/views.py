@@ -6,7 +6,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST, require_http_methods
 from .forms import CustomUserCreationForm
-
+from django.http import JsonResponse
 
 @require_http_methods(['GET', 'POST'])
 def signup(request):
@@ -63,11 +63,21 @@ def profile(request, username):
 @require_POST
 def follow(request, user_pk):
     if request.user.is_authenticated:
-        person = get_object_or_404(get_user_model(), pk=user_pk)
-        user = request.user
-        if person != user:
-            if person.followers.filter(pk=user.pk).exists():
-                person.followers.remove(user)
+        User = get_user_model()
+        me = request.user
+        you = User.objects.get(pk=user_pk)
+        if me != you:
+            if you.followers.filter(pk=me.pk).exists():
+                you.followers.remove(me)
+                is_followed = False      # 추가
             else:
-                person.followers.add(user)
-    return redirect('accounts:profile', person.username)
+                you.followers.add(me)
+                is_followed = True       # 추가
+            context = {                  # 추가 
+                'is_followed' : is_followed,
+                'followers_count': you.followers.count(),
+                'followings_count': you.followings.count(),
+            }
+            return JsonResponse(context) # 추가
+        return redirect('accounts:profile', you.username)
+    return redirect('accounts:login')

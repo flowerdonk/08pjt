@@ -5,20 +5,60 @@
   {% with followings=person.followings.all followers=person.followers.all %}
     <div>
       <div>
-        팔로잉 : {{ followings|length }} / 팔로워 : {{ followers|length }}
+        팔로워: <span id="followers-count">{{ person.followers.all|length }}</span>
+        / 팔로잉: <span id="followings-count">{{ person.followings.all|length }}</span>
       </div>
       {% if user != person %}
         <div>
-          <form action="{% url 'accounts:follow' person.pk %}" method="POST">
-            {% csrf_token %}
-            {% if user in followers %}
-              <button id="followBtn">언팔로우</button>
+          <form id="follow-form" data-user-id="{{ person.pk }}">
+            {% if request.user in person.followers.all %}
+              <button type="submit" class="btn btn-secondary">언팔로우</button>
             {% else %}
-              <button id="followBtn">팔로우</button>
+              <button type="submit" class="btn btn-primary">팔로우</button>
             {% endif %}
           </form>
         </div>
       {% endif %}
     </div>
   {% endwith %}
-{% endblock %}
+{% endblock content %}
+
+{% block script %}
+  const form = document.querySelector('#follow-form')
+
+  form.addEventListener('submit', function(event){
+    event.preventDefault()
+
+    const userId = event.target.dataset.userId
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+
+    axios({// axios(객체-어떻게 요청을 보낼지에 대한 정보가 담김)
+      method: 'post',
+      url: `/accounts/${userId}/follow/`, // backtick
+      headers: {'X-CSRFToken': csrftoken},
+    })
+    .then((response) => {
+      const isFollowed = response.data.is_followed
+      const followBtn = document.querySelector('#follow-form > button')
+      const followersCountTag = document.querySelector('#followers-count')
+      const followingsCountTag = document.querySelector('#followings-count')
+
+      followBtn.classList.toggle('btn-secondary')
+      followBtn.classList.toggle('btn-primary')
+
+      const followersCount = response.data.followers_count
+      const followingsCount = response.data.followings_count
+
+      followersCountTag.innerText = followersCount
+      followingsCountTag.innerText = followingsCount
+
+      if (isFollowed === true){
+        // 팔로우 상태일때는 버튼에 언팔로우라고 떠야함...
+        followBtn.innerText = '언팔로우'
+      } else {
+        followBtn.innerText = '팔로우'
+      }
+    })
+    .catch()
+  })
+{% endblock script %}
