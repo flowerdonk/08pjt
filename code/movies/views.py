@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from .models import Movie, Genre
 from .serializers import GenreSerializer, MovieListSerializer, MovieSerializer, myReviewSerializer
 from community.models import Review
+import random
+
 
 # 영화 전체 조회
 @require_safe
@@ -48,8 +50,27 @@ def recommended(request):
                 genre_list[g.name] = 1
             else: # 딕셔너리에 해당 장르가 있으면 값 추가
                 genre_list[g.name] += 1
+    
 
+    # sol 추가 : 리뷰 수에 따라 큰 장르를 추출
+    # genre_list 내림차순 정렬
+    genre_list = sorted(genre_list.items(), key=lambda x: x[1], reverse=True)
+    # genre_max: 사용자가 가장 많은 리뷰를 작성한 장르 리스트
+    genre_max  = [k for k,v in genre_list if genre_list[0][1] == v]
+    # genre_choice: 가장 많은 리뷰를 생성한 장르가 여러 개 일때 랜덤하게 단 하나를 선택한다.
+    genre_choice = random.choice(genre_max)
+    # genre_chocie_num : 장르 이름으로 장르 테이블에서 객체를 검색 왜냐하면 장르 이름으로 장르 id를 뽑고 싶어서
+    genre_chocie_num = Genre.objects.filter(name = genre_choice)
+    
+    for g in genre_chocie_num:
+        g_id = g.id
+
+    reco_movies = Movie.objects.filter(genres=g_id)
+    print(reco_movies)
     context = {
-        'genre_list' : genre_list,
-    }
+        'genre_chocie' : genre_choice, # 추천하는 장르 한글 이름
+        'reco_movies' : reco_movies, # 추천하는 장르 영화
+              }
+
+
     return render(request, 'movies/recommended.html', context)
