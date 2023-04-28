@@ -2,14 +2,12 @@
 
 {% block content %}
   {{movie}}
-  <hr>
+  <br><br><br>
 
   {% for review in movie.reviews %}
-    <div>
-    {{ review.title }}
-    {{ review.content }}
-    {{ review.rank }}
-    </div>
+    <p>제목: {{ review.title }}   별점: {{ review.rank }}</p>
+    <p>{{ review.content }}</p>
+    <hr>
   {% endfor %}
   <a href="{% url 'community:create' movie.id %}">New Review</a>
 
