@@ -1,7 +1,14 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<h1> {{request.user}}님에게 추천하는 <span style="color:green;"> {{genre_chocie}} </span> 영화 </h1>
+{% for movie in reco_movies %}
+<a href ="{% url 'movies:detail' movie.id %}">
+    <div>
+    <img src="{{movie.poster_path}}" alt="{{movie.title}}">
+    {{movie.title}}
+    </div>
+</a>
+{% endfor %}
 
-
-{{genre_list}}
 {% endblock %}
