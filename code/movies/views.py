@@ -65,7 +65,7 @@ def recommended(request):
         
         for g in genre_chocie_num:
             g_id = g.id
-
+    
         reco_movies = Movie.objects.filter(genres=g_id)
 
     else:
@@ -85,8 +85,9 @@ def recommended(request):
             g_id = g.id
 
         reco_movies = Movie.objects.filter(genres=g_id)
-
-
+    n = (min(10, len(reco_movies)))
+    reco_movies = reco_movies[:n]
+    print(len(reco_movies),"개의 추천무비")
     context = {
         'genre_chocie' : genre_choice, # 추천하는 장르 한글 이름
         'reco_movies' : reco_movies, # 추천하는 장르 영화
