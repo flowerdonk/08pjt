@@ -31,14 +31,16 @@ def detail(request, movie_pk):
     
     return render(request, 'movies/detail.html', context)
 
-
+# 영화 추천 알고리즘
 @require_safe
 def recommended(request):
 
     # 해당 프로필 유저가 작성한 리뷰 목록
     myMovies = Review.objects.filter(user=request.user)
 
-    if len(myMovies): # 작성한 리뷰가 없을 때
+
+    ### [1] 작성한 리뷰가 있을 때
+    if len(myMovies):
         # 해당 유저가 작성한 리뷰들의 장르 값을 담을 딕셔너리 {'장르': 작성한 리뷰 수}
         genre_list = dict()
 
@@ -53,7 +55,6 @@ def recommended(request):
                     genre_list[g.name] += 1
         
 
-        # sol 추가 : 리뷰 수에 따라 큰 장르를 추출
         # genre_list 내림차순 정렬
         genre_list = sorted(genre_list.items(), key=lambda x: x[1], reverse=True)
         # genre_max: 사용자가 가장 많은 리뷰를 작성한 장르 리스트
@@ -68,6 +69,7 @@ def recommended(request):
     
         reco_movies = Movie.objects.filter(genres=g_id)
 
+    ### [2] 작성한 리뷰가 없을 때
     else:
         # 장르 객체 전부 가져오기
         genres = get_list_or_404(Genre)
@@ -85,9 +87,10 @@ def recommended(request):
             g_id = g.id
 
         reco_movies = Movie.objects.filter(genres=g_id)
+    
+    # 10개 이하로 추천영화 선별하기
     n = (min(10, len(reco_movies)))
     reco_movies = reco_movies[:n]
-    print(len(reco_movies),"개의 추천무비")
     context = {
         'genre_chocie' : genre_choice, # 추천하는 장르 한글 이름
         'reco_movies' : reco_movies, # 추천하는 장르 영화

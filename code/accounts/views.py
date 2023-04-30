@@ -69,15 +69,15 @@ def follow(request, user_pk):
         if me != you:
             if you.followers.filter(pk=me.pk).exists():
                 you.followers.remove(me)
-                is_followed = False      # 추가
+                is_followed = False
             else:
                 you.followers.add(me)
-                is_followed = True       # 추가
-            context = {                  # 추가 
+                is_followed = True
+            context = {
                 'is_followed' : is_followed,
                 'followers_count': you.followers.count(),
                 'followings_count': you.followings.count(),
             }
-            return JsonResponse(context) # 추가
+            return JsonResponse(context)
         return redirect('accounts:profile', you.username)
     return redirect('accounts:login')

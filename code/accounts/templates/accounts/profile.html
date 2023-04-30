@@ -32,9 +32,9 @@
     const userId = event.target.dataset.userId
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
 
-    axios({// axios(객체-어떻게 요청을 보낼지에 대한 정보가 담김)
+    axios({
       method: 'post',
-      url: `/accounts/${userId}/follow/`, // backtick
+      url: `/accounts/${userId}/follow/`,
       headers: {'X-CSRFToken': csrftoken},
     })
     .then((response) => {
@@ -53,7 +53,6 @@
       followingsCountTag.innerText = followingsCount
 
       if (isFollowed === true){
-        // 팔로우 상태일때는 버튼에 언팔로우라고 떠야함...
         followBtn.innerText = '언팔로우'
       } else {
         followBtn.innerText = '팔로우'

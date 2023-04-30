@@ -27,9 +27,9 @@
   const forms = document.querySelectorAll('.like-forms')
   const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
 
-  forms.forEach((form) => { // addEventListener에는 가급적 arrow함수 사용 X
-    form.addEventListener('submit', function (event) { // 각각의 이벤트마다
-      event.preventDefault() // 없을 경우 form의 기본 기능인 데이터 전송으로 인해 새로고침됨
+  forms.forEach((form) => {
+    form.addEventListener('submit', function (event) {
+      event.preventDefault()
 
       const reviewId = event.target.dataset.reviewId
 
@@ -39,9 +39,8 @@
         headers: {'X-CSRFToken': csrftoken},
       })
       .then((response) => {
-        // like 버튼을 이전에 눌렀는가? 좋아요/좋아요 취소 결정 (서버로 좋아요 여부 받기)
         const isLiked = response.data.is_liked
-        const likeBtn = document.querySelector(`#like-${reviewId}`) // backtick
+        const likeBtn = document.querySelector(`#like-${reviewId}`)
 
         const likesCountTag = document.querySelector('#likes_count')
         const likesCount = response.data.likes_count
